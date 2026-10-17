@@ -14,6 +14,24 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from langchain_core.tools import tool
 
 
+def parse_pattern_terms(pattern_str: str) -> List[str]:
+    """Parse a pattern string from PAMI into individual terms.
+
+    Splits on any whitespace to handle both tab-separated outputs (FPGrowth, Top-K)
+    and space-separated outputs (MaxFPGrowth).
+
+    Args:
+
+        pattern_str: Raw pattern string returned by PAMI.
+
+    Returns:
+        List of non-empty string terms.
+    """
+    if not pattern_str:
+        return []
+    return [t for t in pattern_str.strip().split() if t]
+
+
 def make_tools(session: Any) -> list:
     """Build and return pattern mining tools bound to the given session."""
 
@@ -199,8 +217,9 @@ def make_tools(session: Any) -> list:
                 for _, row in patterns_df.iterrows():
                     pat_str = str(row["Patterns"])
                     sup_val = int(row["Support"])
-                    terms = pat_str.strip().split("\t")
-                    parsed_patterns.append({"terms": terms, "support": sup_val})
+                    terms = parse_pattern_terms(pat_str)
+                    if terms:
+                        parsed_patterns.append({"terms": terms, "support": sup_val})
 
                 # Sort by support descending
                 parsed_patterns.sort(key=lambda p: p["support"], reverse=True)

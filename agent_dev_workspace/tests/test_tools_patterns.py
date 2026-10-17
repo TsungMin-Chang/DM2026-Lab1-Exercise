@@ -11,7 +11,16 @@ Tests known answers #17 and #20 from TEST_FIXTURE.md:
 import pytest
 from agent_pipeline.session_state import SessionState
 from agent_pipeline.workspace_loader import load_workspace_tools
-from tools_patterns import make_tools as make_patterns_tools
+from tools_patterns import make_tools as make_patterns_tools, parse_pattern_terms
+
+
+def test_parse_pattern_terms():
+    """Test parse_pattern_terms helper function on various delimiters and edge cases."""
+    assert parse_pattern_terms("lines subject organization com") == ["lines", "subject", "organization", "com"]
+    assert parse_pattern_terms("lines\tsubject") == ["lines", "subject"]
+    assert parse_pattern_terms("alpha") == ["alpha"]
+    assert parse_pattern_terms("") == []
+    assert parse_pattern_terms("   ") == []
 
 
 def _setup_session():
